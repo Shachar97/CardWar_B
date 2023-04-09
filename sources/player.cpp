@@ -1,75 +1,95 @@
 #include "player.hpp"
 #include "game.hpp"
 #include "card.hpp"
+
+#include <iostream>
 #include <string>
+#include <array>
+#include <vector>
+
+#include <stdexcept>
+
 using namespace ariel;
 using namespace std;
 
-#define HALF_DECK 26
 
-Player::Player(string name): name_(name),stacksize_(0),cardesTaken_(0),stack_pile_(create_pile_()){}
+
+Player::Player(string name): name_(name),stacksize_(0),cardesTaken_(0), wins_(0){}
+
 
 Player::~Player(){
-    for (size_t i = 0; i < HALF_DECK; i++)
-    {
-        if (stack_pile_[i])
-        {
-            delete stack_pile_[i];
-        }
-        
-    }
-    
-    delete[] stack_pile_;
 }
 
-Player::Player(Player &player): name_(player.name_),stacksize_(0),cardesTaken_(0),stack_pile_(create_pile_()){}
+Player::Player(Player &player): name_(player.name_),stacksize_(0),cardesTaken_(0){}
+
 int Player::stacksize() const{
     return stacksize_;
+} 
+
+int Player::getWins() const{
+    return wins_;
 }
 
-Card** Player::create_pile_(){
-    Card** pile = new Card*[HALF_DECK]; //need to destruct!
-    for(size_t i = 0 ; i<HALF_DECK; i++){
-        pile[i]=nullptr;
-    }
-    return pile;
+void Player::incWins(){
+    wins_++;
 }
 
 int Player::cardesTaken() const{
     return cardesTaken_;
 }
 
-string Player::getName(){
+string Player::getName() const{
     return name_;
 }
 
-Card** Player::getStackPile() const{
-    return stack_pile_;
-}
+
 
 Card* Player::pop_card() {
-    if(0/*pile is empty*/){
-        /*throw error*/
+    try
+    {
+        if(pile_.size()==0){
+            /*error*/
+            throw out_of_range("pile is empty");
+        }
+        else{
+            Card * pop_card = pile_.back();
+            pile_.pop_back();
+            decStacksize_();
+
+            return pop_card;
+        }
+    }
+    catch(const std::exception& e){//pile is empty
+        cout << "Error: " << e.what() << endl;
         return nullptr;
     }
-    else{
-        int i = stacksize()-1; // i hold the pointer  last Card in the pile
-        Card *popCard = stack_pile_[i];
-        stack_pile_[i]=nullptr;
-        decStacksize();
-        return popCard;
+}
+
+
+void Player::pushPile(Card *pcard) {
+    try
+    {
+        if(pile_.size()>=26){
+            throw runtime_error("pile is full");
+        }
+        if(!pcard){
+            throw runtime_error("trying to push null card to the pile");
+        
+        }else{
+            pile_.push_back(pcard);
+            incStacksize_();
+        }
     }
+    catch(const std::exception& e){ //pile is full
+        cout << "Error: " << e.what() << endl;
+    }  
 }
 
-void Player::setStackPile(Card *c, int index) {
-    stack_pile_[index]=c;
-}
-
-void Player::incStacksize(){
+void Player::incStacksize_(){
     stacksize_++;
 }
 
-void Player::decStacksize(){
+void Player::decStacksize_(){
     stacksize_--;
 }
 

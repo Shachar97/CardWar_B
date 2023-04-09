@@ -3,7 +3,9 @@
 #include "card.hpp"
 
 #include <iostream>
+#include <stdexcept>
 #include <string>
+#include <array>
 
 using namespace ariel;
 using namespace std;
